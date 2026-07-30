@@ -1,7 +1,7 @@
 services:
   auth-service:
     env_file:
-    - ./auth-service/.env
+      - ./auth-service/.env
     build:
       context: ./auth-service
       dockerfile: Dockerfile
@@ -9,9 +9,10 @@ services:
     ports:
       - "8001:8080"
     restart: unless-stopped
+
   url-shortener-service:
     env_file:
-    - ./url-shortener-service/.env
+      - ./url-shortener-service/.env
     build:
       context: ./url-shortener-service
       dockerfile: Dockerfile
@@ -19,7 +20,10 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
-  database:
+    depends_on:
+      - postgres
+
+  postgres:
     image: postgres:17
     ports:
       - "5001:5432"

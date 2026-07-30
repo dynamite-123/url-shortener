@@ -1,6 +1,7 @@
 from fastapi import Depends, FastAPI
+from app.core.lifespan import lifespan
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def hello():
