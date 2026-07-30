@@ -1,0 +1,30 @@
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
+  url-shortener-service:
+    build:
+      context: ./url-shortener-service
+      dockerfile: Dockerfile
+    container_name: url-shortener-service
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+  database:
+    image: postgres:17
+    ports:
+      - "5001:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+volumes:
+  pgdata:
