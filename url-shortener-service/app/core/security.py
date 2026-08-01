@@ -1,14 +1,20 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordBearer
 
+from app.services.auth_client import get_auth_client
 
-def extract_bearer_token(authorization: str) -> str:
-    scheme, _, token = authorization.partition(" ")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-    if scheme.lower() != "bearer" or not token:
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    auth_client = Depends(get_auth_client),
+):
+    user = await auth_client.verify_token(token)
+
+    if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authorization header",
-            headers={"WWW-Authenticate": "Bearer"},
+            status_code=401,
+            detail="Invalid authentication credentials",
         )
 
-    return token
+    return user
