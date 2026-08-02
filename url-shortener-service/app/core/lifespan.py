@@ -5,11 +5,18 @@ from httpx import AsyncClient
 from redis.asyncio import Redis
 
 from app.core.config import settings
+from app.core.database import Base, engine
 from app.services.auth_client import AuthClient
+
+# Import models so SQLAlchemy registers them before create_all
+import app.models.url  # noqa: F401
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Create database tables if they don't exist yet
+    Base.metadata.create_all(bind=engine)
+
     http_client = AsyncClient(
         base_url=settings.auth_service_url,
         timeout=5.0,

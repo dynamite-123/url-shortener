@@ -1,7 +1,5 @@
 services:
   auth-service:
-    env_file:
-      - ./auth-service/.env
     build:
       context: ./auth-service
       dockerfile: Dockerfile
@@ -9,10 +7,15 @@ services:
     ports:
       - "8001:8080"
     restart: unless-stopped
+    environment:
+      PORT: "8080"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      MONGODB_URI: ${MONGODB_URI}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
 
   url-shortener-service:
-    env_file:
-      - ./url-shortener-service/.env
     build:
       context: ./url-shortener-service
       dockerfile: Dockerfile
@@ -22,6 +25,25 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - redis-init
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      AUTH_SERVICE_URL: http://auth-service:8080
+      REDIS_URL: redis://redis:6379
+
+  redis:
+    image: redis:8
+    command: redis-server --appendonly yes
+
+  redis-init:
+    build: ./redis-init
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
 
   postgres:
     image: postgres:17
