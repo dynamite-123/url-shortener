@@ -1,9 +1,25 @@
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
 
+from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import SessionLocal
 from app.schemas.auth import VerifyTokenResponse
 from app.services.auth_client import AuthClient
-from app.services.dependencies import get_auth_client
 from app.core.security import extract_bearer_token
+
+
+async def get_db() -> AsyncSession:
+    async with SessionLocal() as session:
+        yield session
+
+
+def get_redis(request: Request) -> Redis:
+    return request.app.state.redis
+
+
+def get_auth_client(request: Request) -> AuthClient:
+    return request.app.state.auth_client
 
 
 async def get_current_user(
