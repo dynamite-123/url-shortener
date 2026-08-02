@@ -15,7 +15,8 @@ import app.models.url  # noqa: F401
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create database tables if they don't exist yet
-    Base.metadata.create_all(bind=engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     http_client = AsyncClient(
         base_url=settings.auth_service_url,

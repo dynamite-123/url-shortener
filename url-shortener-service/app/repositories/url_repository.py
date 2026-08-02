@@ -38,6 +38,11 @@ class URLRepository:
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
+    async def get_all_by_owner(self, owner_id: UUID) -> list[URL]:
+        result = await self.db.execute(select(URL).where(URL.owner_id == owner_id))
+        return list(result.scalars().all())
+
+
     # Update operations
     async def increment_click_count(self, id: int) -> None:
         await self.db.execute(

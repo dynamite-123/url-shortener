@@ -27,7 +27,7 @@ services:
       - postgres
       - redis-init
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       SECRET_KEY: ${SECRET_KEY}
       AUTH_SERVICE_URL: http://auth-service:8080
       REDIS_URL: redis://redis:6379
