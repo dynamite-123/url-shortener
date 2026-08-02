@@ -14,7 +14,6 @@ class URL(Base):
     id: Mapped[int] = mapped_column(
         BigInteger,
         primary_key=True,
-        autoincrement=True,
     )
 
     short_code: Mapped[str] = mapped_column(
