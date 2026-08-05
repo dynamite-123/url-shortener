@@ -10,6 +10,7 @@ from app.models.url import URL
 class URLRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
+
     async def create(self, url: URL) -> URL:
         self.db.add(url)
         await self.db.commit()
@@ -28,25 +29,30 @@ class URLRepository:
     async def get_by_original_url(
         self,
         original_url: str,
-        owner_id: UUID | None = None,
-    ) -> URL | None:
+        owner_id: str | None = None,
+    ) -> list[URL] | None:
         query = select(URL).where(URL.original_url == original_url)
 
         if owner_id is not None:
             query = query.where(URL.owner_id == owner_id)
 
         result = await self.db.execute(query)
-        return result.scalar_one_or_none()
-
-    async def get_all_by_owner(self, owner_id: UUID) -> list[URL]:
-        result = await self.db.execute(select(URL).where(URL.owner_id == owner_id))
         return list(result.scalars().all())
 
+    async def get_all_by_owner(self, owner_id: str) -> list[URL]:
+        result = await self.db.execute(select(URL).where(URL.owner_id == owner_id))
+        return list(result.scalars().all())
 
     # Update operations
     async def increment_click_count(self, id: int) -> None:
         await self.db.execute(
             update(URL).where(URL.id == id).values(click_count=URL.click_count + 1)
+        )
+        await self.db.commit()
+
+    async def update_click_count(self, id: int, click_count: int) -> None:
+        await self.db.execute(
+            update(URL).where(URL.id == id).values(click_count=click_count)
         )
         await self.db.commit()
 

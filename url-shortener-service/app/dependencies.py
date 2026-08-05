@@ -1,11 +1,12 @@
 from fastapi import Depends, Header, HTTPException, Request, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from collections.abc import AsyncGenerator
 
 from app.core.database import SessionLocal
-from app.schemas.auth import VerifyTokenResponse
+from app.schemas.auth import VerifyTokenResponse, User  
 from app.services.auth_client import AuthClient
 
 
@@ -21,24 +22,22 @@ def get_redis(request: Request) -> Redis:
 def get_auth_client(request: Request) -> AuthClient:
     return request.app.state.auth_client
 
+security = HTTPBearer()
 
 async def get_current_user(
-    authorization: str = Header(...),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_client: AuthClient = Depends(get_auth_client),
-) -> VerifyTokenResponse:
-    if not authorization.lower().startswith("bearer "):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authorization header",
-        )
-    token = authorization[7:]
-
+) -> User:
+    token = credentials.credentials
     try:
-        user = await auth_client.verify_token(token)
+        response = await auth_client.verify_token(token)
+        user = User(id=response.id, username=response.username, role=response.role)
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Invalid authentication credentials",
         )
 
     return user
+
+

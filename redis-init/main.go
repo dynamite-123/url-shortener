@@ -13,6 +13,11 @@ import (
 )
 
 func main() {
+	// const startupDelay = 10 * time.Second
+
+	// fmt.Printf("Waiting %v before initialization...\n", startupDelay)
+	// time.Sleep(startupDelay)
+
 	ctx := context.Background()
 
 	redisURL := os.Getenv("REDIS_URL")

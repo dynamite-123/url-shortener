@@ -6,3 +6,8 @@ class VerifyTokenResponse(BaseModel):
     id: str
     username: str
     role: str
+
+class User(BaseModel):
+    id: str
+    username: str
+    role: str

@@ -17,7 +17,7 @@ class URL(Base):
     )
 
     short_code: Mapped[str] = mapped_column(
-        String(10),
+        String(18),
         unique=True,
         index=True,
         nullable=False,
@@ -28,10 +28,10 @@ class URL(Base):
         nullable=False,
     )
 
-    owner_id: Mapped[UUID | None] = mapped_column(
-        PG_UUID(as_uuid=True),
+    owner_id: Mapped[str] = mapped_column(
+        String(24),
         index=True,
-        nullable=True,
+        nullable=False,
     )
 
     created_at: Mapped[datetime] = mapped_column(
